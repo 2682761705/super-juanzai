@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        li {
+            list-style: none;
+        }
+
+        .wrap {
+            width: 500px;
+            height: 600px;
+            background-color: bisque;
+            margin: auto;
+        }
+
+        p {
+            text-align: center;
+            font-size: 50px;
+            color: orange;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 500px;
+        }
+
+        table td {
+            padding: 10px;
+            vertical-align: middle;
+        }
+
+        #manifest {
+            width: 400px;
+            height: 30px;
+            margin-left: 20px;
+            padding-left: 10px;
+        }
+
+        .choose {
+            width: 20px;
+            height: 20px;
+            vertical-align: middle;
+        }
+
+        .text {
+            color: gray;
+            text-decoration: line-through;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrap">
+        <p>备忘录</p>
+        <div class="min">
+            <table border="1px" id="table">
+                <thead>
+                    <tr>
+                        <td>
+                            <input type="checkbox" id="all" class='choose'>
+                            <input type="text" placeholder="需要做什么" id="manifest">
+                        </td>
+                    </tr>
+                </thead>
+                <tbody id="tbody"></tbody>
+                <tfoot>
+                    <tr>
+                        <td>
+                            <span></span>
+                            <button>全部</button>
+                            <button>未完成</button>
+                            <button>已完成</button>
+                            <button>清除完成项</button>
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+        const table = document.getElementById('table')
+        // 获取输入框
+        const manifest = document.getElementById('manifest')
+        // 获取表格
+        const tbody = document.getElementById('tbody')
+        // 获取单元格
+        const text = document.getElementById('text')
+        // 获取复选框
+        const all = document.getElementById('all')
+        // 接收列表
+        const list = []
+
+        // 页面渲染
+        function htm(arr) {
+            let html = ''
+            arr.forEach((item, index) => {
+                html += `<tr>
+                    <td id='text'>
+                        <input type='checkbox' class='choose' data-id='${item.id}'>&emsp;${item.name}
+                    </td>
+                    </tr>
+                `
+            });
+            tbody.innerHTML = html
+
+        }
+
+        // 获取输入框内容并渲染页面
+        $('#manifest').on('keydown', function (event) {
+            if (event.keyCode == 13) {
+                let manValu = manifest.value
+                let listId = Math.ceil(Math.random() * 1000 + 1)
+                let id = []
+                id.push(listId)
+                let manId = []
+                for (let i = 0; i < id.length; i++) {
+                    if (!manId.includes(id[i])) {
+                        manId.shift
+                        manId.push(id[i])
+                    }
+                }
+                for (let j = 0; j < manId.length; j++) {
+                    let add = {
+                        id: manId[j],
+                        name: manValu,
+                        state: false
+                    }
+                    list.push(add)
+                    htm(list)
+                }
+                localStorage.setItem('list', JSON.stringify(list))
+            }
+        })
+
+        // 列表单选
+        function tablefun() {
+            if (event.target.nodeName == 'INPUT') {
+                let inpId = event.target.dataset.id
+                list.forEach((item, index) => {
+                    if (item.id == inpId && item.state == false) {
+                        item.state = true
+                        this.classList.add('text')
+                    } else if (item.id == inpId && item.state == true) {
+                        item.state = false
+                    }
+                })
+            }
+
+            // 全部按钮
+            if (event.target.nodeName == 'BUTTON' && event.target.innerHTML == '全部') {
+                let everys = []
+                list.forEach((item, indx) => {
+                    everys.push(item)
+                })
+                htm(everys)
+            }
+
+
+            // 未完成按钮
+            if (event.target.nodeName == 'BUTTON' && event.target.innerHTML == '未完成') {
+                let wei = []
+                list.forEach((item, indx) => {
+                    if (item.state == false) {
+                        wei.push(item)
+                    }
+                })
+                htm(wei)
+            }
+
+
+            // 已完成按钮
+            if (event.target.nodeName == 'BUTTON' && event.target.innerHTML == '已完成') {
+                let yes = []
+                list.forEach((item, indx) => {
+                    if (item.state == true) {
+                        yes.push(item)
+                    }
+                })
+                htm(yes)
+            }
+        }
+
+        // 全选事件
+        function allfun() {
+            let all = $(this).prop('checked')
+            let inpu = $('#tbody input')
+            if (all == true) {
+                inpu.prop('checked', true)
+            } else if (all == false) {
+                inpu.prop('checked', false)
+            }
+        }
+
+
+
+
+        window.onload = function () {
+            let locaGoods = localStorage.getItem('list')
+            if (locaGoods != null) {
+                goods = JSON.parse(locaGoods)
+            }
+
+            table.addEventListener('click', tablefun)
+
+            all.addEventListener('click', allfun)
+        }
+    </script>
+
+</body>
+
+</html>
